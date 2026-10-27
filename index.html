@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alpha Cleaner — Pembersih Kabut PNG</title>
+<style>
+  :root {
+    --bg: #070b10;
+    --panel: #0e141c;
+    --panel-2: #131b25;
+    --line: #1f2a37;
+    --text: #e6edf3;
+    --muted: #8b98a8;
+    --accent: #3ddcc5;
+    --accent-2: #2aa898;
+    --warn: #ff4fd8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { min-height: 100vh; }
+
+  header { padding: 20px 24px 8px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 20px; letter-spacing: .04em; }
+  header h1 span { color: var(--accent); }
+  header p { margin: 0; color: var(--muted); font-size: 13px; }
+
+  .layout { display: grid; grid-template-columns: 320px 1fr; gap: 16px; padding: 12px 24px 32px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; padding: 12px 14px 28px; } }
+
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+  .sidebar { padding: 16px; display: flex; flex-direction: column; gap: 16px; align-self: start; }
+
+  .drop {
+    border: 1.5px dashed #2c3b4d; border-radius: 12px; padding: 22px 12px;
+    text-align: center; cursor: pointer; transition: .15s; background: var(--panel-2);
+  }
+  .drop:hover, .drop.over { border-color: var(--accent); background: #10201f; }
+  .drop b { display: block; font-size: 14px; margin-bottom: 4px; }
+  .drop small { color: var(--muted); }
+  .drop .fname { margin-top: 8px; color: var(--accent); font-size: 12px; word-break: break-all; }
+
+  .ctrl { display: flex; flex-direction: column; gap: 6px; }
+  .ctrl label { display: flex; justify-content: space-between; font-size: 13px; }
+  .ctrl label output { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .ctrl .hint { color: var(--muted); font-size: 11.5px; line-height: 1.4; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  select {
+    background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px; font-size: 13px;
+  }
+  .check { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+  .check input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+  .btn {
+    background: var(--accent); color: #031512; border: 0; border-radius: 10px;
+    padding: 12px 14px; font-weight: 700; font-size: 14px; cursor: pointer; width: 100%;
+  }
+  .btn:hover { background: #5eebd6; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); font-weight: 500; }
+  .btn.ghost:hover { border-color: var(--accent); background: transparent; }
+
+  .stats { font-size: 12px; color: var(--muted); line-height: 1.7; background: var(--panel-2);
+    border-radius: 10px; padding: 10px 12px; border: 1px solid var(--line); }
+  .stats b { color: var(--text); font-weight: 600; }
+  .stats .fog { color: var(--warn); }
+
+  .main { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 12px; }
+  .toolbar .label { color: var(--muted); font-size: 12px; margin-right: 2px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+  .seg button {
+    background: var(--panel-2); color: var(--muted); border: 0; padding: 7px 12px;
+    font-size: 12px; cursor: pointer; border-right: 1px solid var(--line);
+  }
+  .seg button:last-child { border-right: 0; }
+  .seg button.on { background: #12302d; color: var(--accent); }
+
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 1100px) { .panels { grid-template-columns: 1fr; } }
+  .panel { overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+  .panel .head { display: flex; justify-content: space-between; padding: 10px 14px;
+    font-size: 12px; letter-spacing: .12em; border-bottom: 1px solid var(--line); background: #0a1017; }
+  .panel .head span:first-child { color: var(--accent); }
+  .panel .head span:last-child { color: var(--muted); letter-spacing: 0; }
+  .view { overflow: auto; max-height: 70vh; padding: 0; }
+  .view.bg-dark { background-color: #0a0f15;
+    background-image: linear-gradient(45deg, #101720 25%, transparent 25%, transparent 75%, #101720 75%),
+                      linear-gradient(45deg, #101720 25%, transparent 25%, transparent 75%, #101720 75%);
+    background-size: 20px 20px; background-position: 0 0, 10px 10px; }
+  .view.bg-white { background: #fff; }
+  .view.bg-gray { background: #7a7f87; }
+  .view canvas { display: block; margin: 0 auto; }
+  .view.fit canvas { max-width: 100%; height: auto; }
+  .empty { color: var(--muted); font-size: 13px; padding: 60px 20px; text-align: center; }
+  .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    background: #12302d; color: var(--accent); padding: 10px 16px; border-radius: 10px;
+    font-size: 13px; opacity: 0; pointer-events: none; transition: .2s; border: 1px solid #1f5a52; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ALPHA <span>CLEANER</span></h1>
+  <p>Bersihkan kabut / fog semi-transparan di PNG sebelum di-trace ke SVG. Semua proses di browser, gambar tidak di-upload ke mana pun.</p>
+</header>
+
+<div class="layout">
+  <aside class="card sidebar">
+    <div class="drop" id="drop">
+      <b>Drop PNG di sini</b>
+      <small>atau klik untuk pilih file &middot; bisa juga Ctrl+V</small>
+      <div class="fname" id="fname"></div>
+      <input type="file" id="file" accept="image/png,image/webp,image/*" hidden>
+    </div>
+
+    <div class="ctrl">
+      <label>Threshold alpha <output id="o-thr">128</output></label>
+      <input type="range" id="thr" min="1" max="254" value="128">
+      <div class="hint">Piksel dengan alpha di bawah angka ini jadi transparan penuh, sisanya opak penuh. Naikkan kalau kabut masih tersisa; turunkan kalau objek mulai terkikis.</div>
+    </div>
+
+    <div class="ctrl">
+      <label>Erode tepi <output id="o-erode">1 px</output></label>
+      <input type="range" id="erode" min="0" max="6" value="1">
+      <div class="hint">Memangkas halo putih tipis di pinggir objek. Biasanya 1 sampai 2 px cukup.</div>
+    </div>
+
+    <div class="ctrl">
+      <label>Hapus bintik kecil <output id="o-speck">20 px</output></label>
+      <input type="range" id="speck" min="0" max="500" step="5" value="20">
+      <div class="hint">Membuang pulau-pulau kecil sisa kabut yang terpisah dari objek utama.</div>
+    </div>
+
+    <div class="ctrl">
+      <label>Upscale (sisi terpanjang)</label>
+      <select id="upscale">
+        <option value="0">Tanpa upscale</option>
+        <option value="1500">Sampai 1500 px</option>
+        <option value="2000" selected>Sampai 2000 px</option>
+        <option value="3000">Sampai 3000 px</option>
+      </select>
+      <div class="hint">Hanya membesarkan kalau gambar lebih kecil dari target. Gambar yang sudah cukup besar tidak diubah.</div>
+    </div>
+
+    <label class="check"><input type="checkbox" id="fogHi" checked> Sorot kabut di gambar asli (magenta)</label>
+
+    <div class="stats" id="stats">Belum ada gambar.</div>
+
+    <button class="btn" id="dl" disabled>Download PNG bersih</button>
+    <button class="btn ghost" id="reset" disabled>Reset pengaturan</button>
+  </aside>
+
+  <section class="main">
+    <div class="card toolbar">
+      <span class="label">Latar:</span>
+      <div class="seg" id="bgSeg">
+        <button data-bg="dark" class="on">Gelap</button>
+        <button data-bg="white">Putih</button>
+        <button data-bg="gray">Abu</button>
+      </div>
+      <span class="label" style="margin-left:10px">Ukuran:</span>
+      <div class="seg" id="zoomSeg">
+        <button data-z="fit" class="on">Muat layar</button>
+        <button data-z="full">100%</button>
+      </div>
+    </div>
+
+    <div class="panels">
+      <div class="card panel">
+        <div class="head"><span>ORIGINAL</span><span id="infoA">-</span></div>
+        <div class="view bg-dark fit" id="viewA"><div class="empty">Belum ada gambar.</div></div>
+      </div>
+      <div class="card panel">
+        <div class="head"><span>HASIL BERSIH</span><span id="infoB">-</span></div>
+        <div class="view bg-dark fit" id="viewB"><div class="empty">Hasil akan muncul di sini.</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const drop = $('drop'), fileIn = $('file');
+  const thr = $('thr'), erode = $('erode'), speck = $('speck'), upscale = $('upscale'), fogHi = $('fogHi');
+  const viewA = $('viewA'), viewB = $('viewB');
+  const DEFAULTS = { thr: 128, erode: 1, speck: 20, upscale: '2000' };
+
+  let srcImg = null;       // HTMLImageElement / ImageBitmap
+  let srcName = 'gambar';
+  let canvasA = document.createElement('canvas');
+  let canvasB = document.createElement('canvas');
+  let timer = null;
+
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  /* ---------- Muat gambar ---------- */
+  function loadFile(file) {
+    if (!file || !file.type.startsWith('image/')) { toast('File harus berupa gambar'); return; }
+    srcName = (file.name || 'gambar').replace(/\.[^.]+$/, '');
+    $('fname').textContent = file.name || 'dari clipboard';
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { srcImg = img; URL.revokeObjectURL(url); $('dl').disabled = false; $('reset').disabled = false; run(); };
+    img.onerror = () => toast('Gagal membaca gambar');
+    img.src = url;
+  }
+
+  drop.addEventListener('click', () => fileIn.click());
+  fileIn.addEventListener('change', (e) => loadFile(e.target.files[0]));
+  ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+  window.addEventListener('paste', e => {
+    const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
+    if (item) loadFile(item.getAsFile());
+  });
+
+  /* ---------- Pemrosesan ---------- */
+  function schedule() {
+    $('o-thr').textContent = thr.value;
+    $('o-erode').textContent = erode.value + ' px';
+    $('o-speck').textContent = speck.value + ' px';
+    clearTimeout(timer);
+    timer = setTimeout(run, 120);
+  }
+  [thr, erode, speck, upscale, fogHi].forEach(el => el.addEventListener('input', schedule));
+
+  function run() {
+    if (!srcImg) return;
+    const t0 = performance.now();
+
+    // 1) Canvas kerja (dengan upscale bila perlu)
+    const w0 = srcImg.naturalWidth, h0 = srcImg.naturalHeight;
+    const target = +upscale.value;
+    const longSide = Math.max(w0, h0);
+    const s = (target > 0 && longSide < target) ? target / longSide : 1;
+    const W = Math.round(w0 * s), H = Math.round(h0 * s);
+
+    canvasB.width = W; canvasB.height = H;
+    const ctxB = canvasB.getContext('2d', { willReadFrequently: true });
+    ctxB.clearRect(0, 0, W, H);
+    ctxB.imageSmoothingEnabled = true;
+    ctxB.imageSmoothingQuality = 'high';
+    ctxB.drawImage(srcImg, 0, 0, W, H);
+
+    const img = ctxB.getImageData(0, 0, W, H);
+    const d = img.data, n = W * H;
+
+    // Statistik kabut (sebelum dibersihkan)
+    let fog = 0, solid = 0;
+    for (let i = 3; i < d.length; i += 4) {
+      const a = d[i];
+      if (a > 8 && a < 248) fog++;
+      if (a >= 8) solid++;
+    }
+
+    // 2) Threshold alpha -> mask biner
+    const T = +thr.value;
+    let mask = new Uint8Array(n);
+    for (let i = 0; i < n; i++) mask[i] = d[i * 4 + 3] >= T ? 1 : 0;
+
+    // 3) Erode (separable, kotak (2r+1)^2); luar canvas dianggap opak
+    const r = +erode.value;
+    if (r > 0) {
+      const tmp = new Uint8Array(n);
+      for (let y = 0; y < H; y++) {
+        const row = y * W;
+        for (let x = 0; x < W; x++) {
+          let v = 1;
+          const x0 = Math.max(0, x - r), x1 = Math.min(W - 1, x + r);
+          for (let k = x0; k <= x1; k++) { if (!mask[row + k]) { v = 0; break; } }
+          tmp[row + x] = v;
+        }
+      }
+      const out = new Uint8Array(n);
+      for (let y = 0; y < H; y++) {
+        const y0 = Math.max(0, y - r), y1 = Math.min(H - 1, y + r);
+        for (let x = 0; x < W; x++) {
+          let v = 1;
+          for (let k = y0; k <= y1; k++) { if (!tmp[k * W + x]) { v = 0; break; } }
+          out[y * W + x] = v;
+        }
+      }
+      mask = out;
+    }
+
+    // 4) Hapus bintik kecil (komponen terhubung 4-arah)
+    const minArea = +speck.value;
+    let removedSpecks = 0;
+    if (minArea > 0) {
+      const seen = new Uint8Array(n);
+      const q = new Int32Array(n);
+      for (let i = 0; i < n; i++) {
+        if (!mask[i] || seen[i]) continue;
+        let head = 0, tail = 0;
+        q[tail++] = i; seen[i] = 1;
+        while (head < tail) {
+          const p = q[head++];
+          const x = p % W;
+          if (x > 0     && mask[p - 1] && !seen[p - 1]) { seen[p - 1] = 1; q[tail++] = p - 1; }
+          if (x < W - 1 && mask[p + 1] && !seen[p + 1]) { seen[p + 1] = 1; q[tail++] = p + 1; }
+          if (p >= W    && mask[p - W] && !seen[p - W]) { seen[p - W] = 1; q[tail++] = p - W; }
+          if (p < n - W && mask[p + W] && !seen[p + W]) { seen[p + W] = 1; q[tail++] = p + W; }
+        }
+        if (tail < minArea) {
+          for (let k = 0; k < tail; k++) mask[q[k]] = 0;
+          removedSpecks++;
+        }
+      }
+    }
+
+    // 5) Tulis hasil
+    for (let i = 0; i < n; i++) {
+      const o = i * 4;
+      if (mask[i]) { d[o + 3] = 255; }
+      else { d[o] = d[o + 1] = d[o + 2] = 0; d[o + 3] = 0; }
+    }
+    ctxB.putImageData(img, 0, 0);
+
+    // 6) Panel ORIGINAL (dengan sorotan kabut bila aktif)
+    canvasA.width = w0; canvasA.height = h0;
+    const ctxA = canvasA.getContext('2d', { willReadFrequently: true });
+    ctxA.clearRect(0, 0, w0, h0);
+    ctxA.drawImage(srcImg, 0, 0);
+    if (fogHi.checked) {
+      const ia = ctxA.getImageData(0, 0, w0, h0), da = ia.data;
+      for (let i = 0; i < da.length; i += 4) {
+        const a = da[i + 3];
+        if (a > 8 && a < 248) { da[i] = 255; da[i + 1] = 79; da[i + 2] = 216; da[i + 3] = Math.max(a, 170); }
+      }
+      ctxA.putImageData(ia, 0, 0);
+    }
+
+    mount(viewA, canvasA); mount(viewB, canvasB);
+    $('infoA').textContent = w0 + ' × ' + h0 + ' px';
+    $('infoB').textContent = W + ' × ' + H + ' px' + (s > 1 ? ' (upscale ' + s.toFixed(2) + '×)' : '');
+
+    const pct = solid ? (fog / solid * 100) : 0;
+    const hasAlpha = (fog + solid) > 0 && solid < n;
+    $('stats').innerHTML =
+      'Piksel berkabut: <b class="fog">' + fog.toLocaleString('id-ID') + '</b> (' + pct.toFixed(1) + '% dari piksel terlihat)<br>' +
+      'Bintik dibuang: <b>' + removedSpecks.toLocaleString('id-ID') + '</b><br>' +
+      'Waktu proses: <b>' + Math.round(performance.now() - t0) + ' ms</b>' +
+      (hasAlpha ? '' : '<br><span style="color:#ffb454">Gambar ini tampaknya tidak punya area transparan. Pakai PNG hasil background removal.</span>');
+  }
+
+  function mount(view, canvas) {
+    if (canvas.parentNode !== view) { view.innerHTML = ''; view.appendChild(canvas); }
+  }
+
+  /* ---------- Latar & zoom ---------- */
+  $('bgSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    [...$('bgSeg').children].forEach(x => x.classList.toggle('on', x === b));
+    [viewA, viewB].forEach(v => { v.classList.remove('bg-dark', 'bg-white', 'bg-gray'); v.classList.add('bg-' + b.dataset.bg); });
+  });
+  $('zoomSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    [...$('zoomSeg').children].forEach(x => x.classList.toggle('on', x === b));
+    [viewA, viewB].forEach(v => v.classList.toggle('fit', b.dataset.z === 'fit'));
+  });
+
+  /* ---------- Download & reset ---------- */
+  $('dl').addEventListener('click', () => {
+    if (!srcImg) return;
+    canvasB.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = srcName + '-bersih.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      toast('PNG bersih diunduh');
+    }, 'image/png');
+  });
+
+  $('reset').addEventListener('click', () => {
+    thr.value = DEFAULTS.thr; erode.value = DEFAULTS.erode; speck.value = DEFAULTS.speck; upscale.value = DEFAULTS.upscale;
+    schedule();
+  });
+})();
+</script>
+</body>
+</html>
