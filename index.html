@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Alpha Cleaner — Pembersih Kabut & Warna PNG</title>
+<title>Alpha Cleaner — Pembersih Kabut PNG</title>
 <style>
   :root {
     --bg: #070b10;
@@ -13,6 +13,7 @@
     --text: #e6edf3;
     --muted: #8b98a8;
     --accent: #3ddcc5;
+    --accent-2: #2aa898;
     --warn: #ff4fd8;
   }
   * { box-sizing: border-box; }
@@ -25,11 +26,11 @@
   header h1 span { color: var(--accent); }
   header p { margin: 0; color: var(--muted); font-size: 13px; }
 
-  .layout { display: grid; grid-template-columns: 330px 1fr; gap: 16px; padding: 12px 24px 32px; }
+  .layout { display: grid; grid-template-columns: 320px 1fr; gap: 16px; padding: 12px 24px 32px; }
   @media (max-width: 900px) { .layout { grid-template-columns: 1fr; padding: 12px 14px 28px; } }
 
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
-  .sidebar { padding: 16px; display: flex; flex-direction: column; gap: 14px; align-self: start; }
+  .sidebar { padding: 16px; display: flex; flex-direction: column; gap: 16px; align-self: start; }
 
   .drop {
     border: 1.5px dashed #2c3b4d; border-radius: 12px; padding: 22px 12px;
@@ -40,21 +41,19 @@
   .drop small { color: var(--muted); }
   .drop .fname { margin-top: 8px; color: var(--accent); font-size: 12px; word-break: break-all; }
 
-  .sec { display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    font-size: 11px; letter-spacing: .14em; color: var(--accent); border-top: 1px solid var(--line); padding-top: 14px; }
-  .sec:first-of-type { border-top: 0; padding-top: 0; }
   .ctrl { display: flex; flex-direction: column; gap: 6px; }
   .ctrl label { display: flex; justify-content: space-between; font-size: 13px; }
   .ctrl label output { color: var(--accent); font-variant-numeric: tabular-nums; }
   .ctrl .hint { color: var(--muted); font-size: 11.5px; line-height: 1.4; }
-  .ctrl.off { opacity: .35; pointer-events: none; }
   input[type=range] { width: 100%; accent-color: var(--accent); }
   select {
     background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
     border-radius: 8px; padding: 8px; font-size: 13px;
   }
   .check { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
-  .check input { accent-color: var(--accent); width: 16px; height: 16px; }
+  .check input { accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+  .checkbox-block { display: flex; flex-direction: column; gap: 6px; }
+  .checkbox-block .hint { color: var(--muted); font-size: 11.5px; line-height: 1.4; }
 
   .btn {
     background: var(--accent); color: #031512; border: 0; border-radius: 10px;
@@ -69,14 +68,6 @@
     border-radius: 10px; padding: 10px 12px; border: 1px solid var(--line); }
   .stats b { color: var(--text); font-weight: 600; }
   .stats .fog { color: var(--warn); }
-  .stats .ok { color: var(--accent); }
-
-  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 6px; }
-  .sw { display: flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--line);
-    border-radius: 8px; padding: 4px 6px; font-size: 10.5px; cursor: pointer; color: var(--muted); }
-  .sw:hover { border-color: var(--accent); }
-  .sw i { width: 16px; height: 16px; border-radius: 4px; flex: none; border: 1px solid rgba(255,255,255,.15); }
-  .sw span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   .main { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
   .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 12px; }
@@ -88,8 +79,6 @@
   }
   .seg button:last-child { border-right: 0; }
   .seg button.on { background: #12302d; color: var(--accent); }
-  .busy { margin-left: auto; color: var(--accent); font-size: 12px; display: none; }
-  .busy.on { display: inline; }
 
   .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 1100px) { .panels { grid-template-columns: 1fr; } }
@@ -110,7 +99,8 @@
   .empty { color: var(--muted); font-size: 13px; padding: 60px 20px; text-align: center; }
   .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
     background: #12302d; color: var(--accent); padding: 10px 16px; border-radius: 10px;
-    font-size: 13px; opacity: 0; pointer-events: none; transition: .2s; border: 1px solid #1f5a52; }
+    font-size: 13px; opacity: 0; pointer-events: none; transition: .2s; border: 1px solid #1f5a52;
+    max-width: 92vw; text-align: center; }
   .toast.show { opacity: 1; }
 </style>
 </head>
@@ -118,7 +108,7 @@
 
 <header>
   <h1>ALPHA <span>CLEANER</span></h1>
-  <p>Bersihkan kabut semi-transparan dan ratakan warna PNG sebelum di-trace ke SVG. Semua proses di browser, gambar tidak di-upload ke mana pun.</p>
+  <p>Bersihkan kabut transparan (alpha) dan kabut warna di PNG sebelum di-trace ke SVG. Semua proses di browser, gambar tidak di-upload ke mana pun.</p>
 </header>
 
 <div class="layout">
@@ -130,81 +120,43 @@
       <input type="file" id="file" accept="image/png,image/webp,image/*" hidden>
     </div>
 
-    <div class="sec"><span>1 · BERSIHKAN KABUT (ALPHA)</span></div>
+    <div class="checkbox-block">
+      <label class="check"><input type="checkbox" id="flat" checked> Ratakan warna (hapus kabut warna)</label>
+      <div class="hint">Meratakan bercak, bintik, dan gradasi halus di dalam bidang warna (misalnya krem sapu tangan) menjadi satu warna rata, tanpa merusak tepi tegas. Ini yang membuat hasil trace bersih. Garis tipis (misalnya garis jari) dijaga; bayangan lembut yang sangat samar bisa ikut disederhanakan. Matikan kalau perlu detail itu.</div>
+    </div>
 
     <div class="ctrl">
       <label>Threshold alpha <output id="o-thr">128</output></label>
       <input type="range" id="thr" min="1" max="254" value="128">
-      <div class="hint">Piksel dengan alpha di bawah angka ini jadi transparan penuh, sisanya opak penuh. Naikkan kalau kabut masih tersisa.</div>
+      <div class="hint">Piksel dengan alpha di bawah angka ini jadi transparan penuh, sisanya opak penuh. Naikkan kalau kabut masih tersisa; turunkan kalau objek mulai terkikis.</div>
     </div>
 
     <div class="ctrl">
       <label>Erode tepi <output id="o-erode">1 px</output></label>
       <input type="range" id="erode" min="0" max="6" value="1">
-      <div class="hint">Memangkas halo tipis di pinggir siluet.</div>
+      <div class="hint">Memangkas halo putih tipis di pinggir objek (bentuk bulat, sudut tidak ikut tergerus). Biasanya 1 sampai 2 px cukup.</div>
     </div>
 
     <div class="ctrl">
-      <label>Hapus bintik dan lubang kecil <output id="o-speck">20 px²</output></label>
+      <label>Hapus bintik &amp; lubang kecil <output id="o-speck">20 px</output></label>
       <input type="range" id="speck" min="0" max="500" step="5" value="20">
-      <div class="hint">Membuang pulau kecil sisa kabut dan menutup lubang kecil di dalam objek.</div>
+      <div class="hint">Membuang pulau-pulau kecil sisa kabut di luar objek, dan menambal lubang transparan kecil di dalam objek.</div>
     </div>
 
     <div class="ctrl">
       <label>Upscale (sisi terpanjang)</label>
       <select id="upscale">
-        <option value="0">Tanpa upscale</option>
+        <option value="0" selected>Tanpa upscale (disarankan untuk trace)</option>
         <option value="1500">Sampai 1500 px</option>
-        <option value="2000" selected>Sampai 2000 px</option>
+        <option value="2000">Sampai 2000 px</option>
         <option value="3000">Sampai 3000 px</option>
       </select>
-      <div class="hint">Hanya membesarkan kalau gambar lebih kecil dari target.</div>
+      <div class="hint">Untuk tujuan trace SVG, upscale tidak menambah kualitas. Hasil ditambah batas otomatis sekitar 4,2 juta piksel (gambar lebih besar diperkecil sendiri) supaya aman di iPad dan tidak membuat canvas kosong.</div>
     </div>
 
-    <div class="sec"><span>2 · RATAKAN WARNA</span></div>
-    <label class="check"><input type="checkbox" id="flatOn" checked> Aktifkan perataan warna</label>
-
-    <div class="ctrl" data-flat>
-      <label>Jumlah warna maksimum <output id="o-kcol">24</output></label>
-      <input type="range" id="kcol" min="4" max="48" value="24">
-      <div class="hint">Batas atas. Jumlah warna sebenarnya ditentukan gambar, biasanya lebih sedikit.</div>
-    </div>
-
-    <div class="ctrl" data-flat>
-      <label>Gabung warna mirip (ΔE) <output id="o-mde">8</output></label>
-      <input type="range" id="mde" min="2" max="20" value="8">
-      <div class="hint">Makin besar, makin banyak nuansa yang dilebur jadi satu warna flat.</div>
-    </div>
-
-    <div class="ctrl" data-flat>
-      <label>Bersihkan warna tepi <output id="o-band">2 px</output></label>
-      <input type="range" id="band" min="0" max="8" value="2">
-      <div class="hint">Warna piksel di pinggir siluet diganti dengan warna bagian dalam objek, jadi tidak ada garis tepi pucat atau berkabut.</div>
-    </div>
-
-    <div class="ctrl" data-flat>
-      <label>Haluskan batas warna <output id="o-pass">2 putaran</output></label>
-      <input type="range" id="pass" min="0" max="4" value="2">
-      <div class="hint">Merapikan batas antar area warna yang bergerigi.</div>
-    </div>
-
-    <div class="ctrl" data-flat>
-      <label>Gabung area warna kecil <output id="o-minarea">20 px²</output></label>
-      <input type="range" id="minarea" min="0" max="300" step="5" value="20">
-      <div class="hint">Area warna yang lebih kecil dari ini dilebur ke tetangganya.</div>
-    </div>
-
-    <div class="ctrl" data-flat>
-      <label>Ratakan bayangan lembut (ΔE) <output id="o-soft">10</output></label>
-      <input type="range" id="soft" min="0" max="20" value="10">
-      <div class="hint">Area sedang yang warnanya hampir sama dengan tetangganya dilebur. 0 untuk mematikan.</div>
-    </div>
-
-    <label class="check"><input type="checkbox" id="autoScale" checked> Satuan px ikut skala resolusi (disarankan)</label>
-    <label class="check"><input type="checkbox" id="fogHi" checked> Sorot kabut di gambar asli (magenta)</label>
+    <label class="check"><input type="checkbox" id="fogHi" checked> Sorot kabut alpha di gambar asli (magenta)</label>
 
     <div class="stats" id="stats">Belum ada gambar.</div>
-    <div class="swatches" id="swatches"></div>
 
     <button class="btn" id="dl" disabled>Download PNG bersih</button>
     <button class="btn ghost" id="reset" disabled>Reset pengaturan</button>
@@ -223,7 +175,6 @@
         <button data-z="fit" class="on">Muat layar</button>
         <button data-z="full">100%</button>
       </div>
-      <span class="busy" id="busy">Memproses…</span>
     </div>
 
     <div class="panels">
@@ -242,530 +193,626 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===== Alpha Cleaner core: murni typed-array, tanpa DOM ===== */
-(function (root) {
-'use strict';
-var NONE = 255;
-var SQ2 = 1.41421356;
-
-/* ---------- warna ---------- */
-function lin(c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
-function f(t) { return t > 0.008856 ? Math.cbrt(t) : (7.787 * t + 16 / 116); }
-function rgb2lab(r, g, b, out, o) {
-  var R = lin(r), G = lin(g), B = lin(b);
-  var X = f((0.4124564 * R + 0.3575761 * G + 0.1804375 * B) / 0.95047);
-  var Y = f(0.2126729 * R + 0.7151522 * G + 0.0721750 * B);
-  var Z = f((0.0193339 * R + 0.1191920 * G + 0.9503041 * B) / 1.08883);
-  out[o] = 116 * Y - 16; out[o + 1] = 500 * (X - Y); out[o + 2] = 200 * (Y - Z);
-}
-
-/* ---------- mask alpha ---------- */
-function thresholdMask(rgba, n, T) {
-  var m = new Uint8Array(n);
-  for (var i = 0; i < n; i++) m[i] = rgba[i * 4 + 3] >= T ? 1 : 0;
-  return m;
-}
-
-/* jarak chamfer ke piksel 0 terdekat (tepi kanvas TIDAK dianggap 0) */
-function distToZero(mask, W, H) {
-  var n = W * H, d = new Float32Array(n), INF = 1e9, i, x, y, v;
-  for (i = 0; i < n; i++) d[i] = mask[i] ? INF : 0;
-  for (y = 0; y < H; y++) {
-    for (x = 0; x < W; x++) {
-      i = y * W + x; v = d[i]; if (v === 0) continue;
-      if (x > 0 && d[i - 1] + 1 < v) v = d[i - 1] + 1;
-      if (y > 0) {
-        if (d[i - W] + 1 < v) v = d[i - W] + 1;
-        if (x > 0 && d[i - W - 1] + SQ2 < v) v = d[i - W - 1] + SQ2;
-        if (x < W - 1 && d[i - W + 1] + SQ2 < v) v = d[i - W + 1] + SQ2;
-      }
-      d[i] = v;
-    }
-  }
-  for (y = H - 1; y >= 0; y--) {
-    for (x = W - 1; x >= 0; x--) {
-      i = y * W + x; v = d[i]; if (v === 0) continue;
-      if (x < W - 1 && d[i + 1] + 1 < v) v = d[i + 1] + 1;
-      if (y < H - 1) {
-        if (d[i + W] + 1 < v) v = d[i + W] + 1;
-        if (x < W - 1 && d[i + W + 1] + SQ2 < v) v = d[i + W + 1] + SQ2;
-        if (x > 0 && d[i + W - 1] + SQ2 < v) v = d[i + W - 1] + SQ2;
-      }
-      d[i] = v;
-    }
-  }
-  return d;
-}
-
-/* hapus pulau kecil bernilai `val`; untuk lubang (val=0) komponen yang menyentuh tepi kanvas dibiarkan */
-function dropSmall(mask, W, H, minArea, val) {
-  if (minArea <= 0) return 0;
-  var n = W * H, seen = new Uint8Array(n), q = new Int32Array(n), removed = 0;
-  for (var s = 0; s < n; s++) {
-    if (mask[s] !== val || seen[s]) continue;
-    var head = 0, tail = 0, border = false;
-    q[tail++] = s; seen[s] = 1;
-    while (head < tail) {
-      var p = q[head++], x = p % W, y = (p - x) / W;
-      if (x === 0 || y === 0 || x === W - 1 || y === H - 1) border = true;
-      if (x > 0 && mask[p - 1] === val && !seen[p - 1]) { seen[p - 1] = 1; q[tail++] = p - 1; }
-      if (x < W - 1 && mask[p + 1] === val && !seen[p + 1]) { seen[p + 1] = 1; q[tail++] = p + 1; }
-      if (y > 0 && mask[p - W] === val && !seen[p - W]) { seen[p - W] = 1; q[tail++] = p - W; }
-      if (y < H - 1 && mask[p + W] === val && !seen[p + W]) { seen[p + W] = 1; q[tail++] = p + W; }
-    }
-    if (tail < minArea && !(val === 0 && border)) {
-      for (var k = 0; k < tail; k++) mask[q[k]] = val ? 0 : 1;
-      removed++;
-    }
-  }
-  return removed;
-}
-
-/* ---------- palet warna ---------- */
-function buildPalette(rgba, sel, n, K, mergeDE, minPop) {
-  var NB = 1 << 18;
-  var cnt = new Uint32Array(NB), sr = new Float64Array(NB), sg = new Float64Array(NB), sb = new Float64Array(NB);
-  var i, r, g, b, key, total = 0;
-  for (i = 0; i < n; i++) {
-    if (!sel[i]) continue;
-    r = rgba[i * 4]; g = rgba[i * 4 + 1]; b = rgba[i * 4 + 2];
-    key = ((r >> 2) << 12) | ((g >> 2) << 6) | (b >> 2);
-    cnt[key]++; sr[key] += r; sg[key] += g; sb[key] += b; total++;
-  }
-  var cand = [];
-  for (key = 0; key < NB; key++) if (cnt[key] >= minPop) cand.push(key);
-  if (!cand.length) { for (key = 0; key < NB; key++) if (cnt[key] > 0) cand.push(key); }
-  var C = cand.length, lab = new Float32Array(C * 3), w = new Float64Array(C), tmp = new Float32Array(3);
-  for (i = 0; i < C; i++) {
-    key = cand[i]; w[i] = cnt[key];
-    rgb2lab(sr[key] / cnt[key], sg[key] / cnt[key], sb[key] / cnt[key], tmp, 0);
-    lab[i * 3] = tmp[0]; lab[i * 3 + 1] = tmp[1]; lab[i * 3 + 2] = tmp[2];
-  }
-  var order = Array.from({ length: C }, function (_, k) { return k; }).sort(function (a, b2) { return w[b2] - w[a]; });
-  var cen = [], j, d2, L, A, B2, thr2 = mergeDE * mergeDE;
-  for (var oi = 0; oi < C && cen.length < K; oi++) {
-    i = order[oi]; var ok = true;
-    for (j = 0; j < cen.length; j++) {
-      L = lab[i * 3] - cen[j][0]; A = lab[i * 3 + 1] - cen[j][1]; B2 = lab[i * 3 + 2] - cen[j][2];
-      if (L * L + A * A + B2 * B2 < thr2) { ok = false; break; }
-    }
-    if (ok) cen.push([lab[i * 3], lab[i * 3 + 1], lab[i * 3 + 2]]);
-  }
-  /* Lloyd berbobot + gabung pusat yang saling terlalu dekat */
-  var assign = new Int16Array(C), it, bestD, best, dd, merges = 0;
-  for (it = 0; it < 8; it++) {
-    var acc = cen.map(function () { return [0, 0, 0, 0]; });
-    for (i = 0; i < C; i++) {
-      bestD = 1e18; best = 0;
-      for (j = 0; j < cen.length; j++) {
-        L = lab[i * 3] - cen[j][0]; A = lab[i * 3 + 1] - cen[j][1]; B2 = lab[i * 3 + 2] - cen[j][2];
-        dd = L * L + A * A + B2 * B2; if (dd < bestD) { bestD = dd; best = j; }
-      }
-      assign[i] = best;
-      acc[best][0] += lab[i * 3] * w[i]; acc[best][1] += lab[i * 3 + 1] * w[i]; acc[best][2] += lab[i * 3 + 2] * w[i]; acc[best][3] += w[i];
-    }
-    var wt = acc.map(function (a) { return a[3]; });
-    for (j = 0; j < cen.length; j++) if (acc[j][3] > 0) cen[j] = [acc[j][0] / acc[j][3], acc[j][1] / acc[j][3], acc[j][2] / acc[j][3]];
-    /* pusat tanpa anggota dibuang; pasangan terdekat di bawah ambang digabung */
-    for (j = cen.length - 1; j >= 0; j--) if (wt[j] <= 0) { cen.splice(j, 1); wt.splice(j, 1); }
-    var again = true;
-    while (again && cen.length > 1) {
-      again = false; var bi = -1, bj2 = -1, bd2 = (mergeDE * 0.8) * (mergeDE * 0.8);
-      for (i = 0; i < cen.length; i++) for (j = i + 1; j < cen.length; j++) {
-        L = cen[i][0] - cen[j][0]; A = cen[i][1] - cen[j][1]; B2 = cen[i][2] - cen[j][2];
-        dd = L * L + A * A + B2 * B2; if (dd < bd2) { bd2 = dd; bi = i; bj2 = j; }
-      }
-      if (bi >= 0) {
-        var wa = wt[bi] || 1, wb = wt[bj2] || 1;
-        cen[bi] = [(cen[bi][0] * wa + cen[bj2][0] * wb) / (wa + wb), (cen[bi][1] * wa + cen[bj2][1] * wb) / (wa + wb), (cen[bi][2] * wa + cen[bj2][2] * wb) / (wa + wb)];
-        wt[bi] = wa + wb; cen.splice(bj2, 1); wt.splice(bj2, 1); again = true; merges++;
-      }
-    }
-  }
-  /* warna RGB tiap pusat = rata-rata piksel asli anggotanya */
-  var pr = cen.map(function () { return [0, 0, 0, 0]; });
-  for (i = 0; i < C; i++) { key = cand[i]; var q = pr[assign[i]]; q[0] += sr[key]; q[1] += sg[key]; q[2] += sb[key]; q[3] += cnt[key]; }
-  var palRGB = new Uint8Array(cen.length * 3), palLab = new Float32Array(cen.length * 3), pop = [];
-  for (j = 0; j < cen.length; j++) {
-    var c = Math.max(1, pr[j][3]);
-    palRGB[j * 3] = Math.round(pr[j][0] / c); palRGB[j * 3 + 1] = Math.round(pr[j][1] / c); palRGB[j * 3 + 2] = Math.round(pr[j][2] / c);
-    rgb2lab(palRGB[j * 3], palRGB[j * 3 + 1], palRGB[j * 3 + 2], palLab, j * 3);
-    pop.push(pr[j][3]);
-  }
-  return { rgb: palRGB, lab: palLab, k: cen.length, pop: pop, total: total };
-}
-
-function assignLabels(rgba, sel, n, pal) {
-  var labels = new Uint8Array(n).fill(NONE), lut = new Int16Array(1 << 18).fill(-1);
-  var tmp = new Float32Array(3), K = pal.k, pl = pal.lab;
-  for (var i = 0; i < n; i++) {
-    if (!sel[i]) continue;
-    var r = rgba[i * 4], g = rgba[i * 4 + 1], b = rgba[i * 4 + 2];
-    var key = ((r >> 2) << 12) | ((g >> 2) << 6) | (b >> 2), v = lut[key];
-    if (v < 0) {
-      rgb2lab((r & 0xFC) + 2, (g & 0xFC) + 2, (b & 0xFC) + 2, tmp, 0);
-      var bd = 1e18, bj = 0;
-      for (var j = 0; j < K; j++) {
-        var L = tmp[0] - pl[j * 3], A = tmp[1] - pl[j * 3 + 1], B = tmp[2] - pl[j * 3 + 2], d = L * L + A * A + B * B;
-        if (d < bd) { bd = d; bj = j; }
-      }
-      v = lut[key] = bj;
-    }
-    labels[i] = v;
-  }
-  return labels;
-}
-
-/* sebar label dari piksel "interior" ke pita tepi (BFS) */
-function bleed(labels, mask, W, H) {
-  var n = W * H, q = new Int32Array(n), head = 0, tail = 0, i, x;
-  for (i = 0; i < n; i++) {
-    if (!mask[i] || labels[i] === NONE) continue;
-    x = i % W;
-    if ((x > 0 && mask[i - 1] && labels[i - 1] === NONE) || (x < W - 1 && mask[i + 1] && labels[i + 1] === NONE) ||
-        (i >= W && mask[i - W] && labels[i - W] === NONE) || (i < n - W && mask[i + W] && labels[i + W] === NONE)) q[tail++] = i;
-  }
-  while (head < tail) {
-    var p = q[head++], lab = labels[p]; x = p % W;
-    if (x > 0 && mask[p - 1] && labels[p - 1] === NONE) { labels[p - 1] = lab; q[tail++] = p - 1; }
-    if (x < W - 1 && mask[p + 1] && labels[p + 1] === NONE) { labels[p + 1] = lab; q[tail++] = p + 1; }
-    if (p >= W && mask[p - W] && labels[p - W] === NONE) { labels[p - W] = lab; q[tail++] = p - W; }
-    if (p < n - W && mask[p + W] && labels[p + W] === NONE) { labels[p + W] = lab; q[tail++] = p + W; }
-  }
-}
-
-/* filter mayoritas 3x3 pada peta label */
-function modeFilter(labels, mask, W, H, passes, K) {
-  var n = W * H, cnt = new Uint16Array(K + 1);
-  for (var ps = 0; ps < passes; ps++) {
-    var src = labels.slice();
-    for (var y = 1; y < H - 1; y++) {
-      for (var x = 1; x < W - 1; x++) {
-        var i = y * W + x;
-        if (!mask[i]) continue;
-        var c = src[i];
-        if (c === src[i - 1] && c === src[i + 1] && c === src[i - W] && c === src[i + W] &&
-            c === src[i - W - 1] && c === src[i - W + 1] && c === src[i + W - 1] && c === src[i + W + 1]) continue;
-        var nb = [src[i - W - 1], src[i - W], src[i - W + 1], src[i - 1], c, src[i + 1], src[i + W - 1], src[i + W], src[i + W + 1]], k;
-        for (k = 0; k < 9; k++) if (nb[k] !== NONE) cnt[nb[k]]++;
-        var best = c, bc = cnt[c];
-        for (k = 0; k < 9; k++) { var l = nb[k]; if (l !== NONE && cnt[l] > bc) { bc = cnt[l]; best = l; } }
-        for (k = 0; k < 9; k++) if (nb[k] !== NONE) cnt[nb[k]] = 0;
-        labels[i] = best;
-      }
-    }
-  }
-}
-
-/* gabungkan area warna kecil ke tetangga dengan batas terpanjang; kembalikan jumlah area akhir */
-function mergeSmall(labels, mask, W, H, minArea, softArea, contrastDE, pal) {
-  var n = W * H, q = new Int32Array(n), regions = 0, merged = 0;
-  for (var round = 0; round < 3; round++) {
-    var seen = new Uint8Array(n), changed = 0; regions = 0;
-    for (var s = 0; s < n; s++) {
-      if (!mask[s] || seen[s]) continue;
-      var lab = labels[s], head = 0, tail = 0;
-      q[tail++] = s; seen[s] = 1;
-      while (head < tail) {
-        var p = q[head++], x = p % W;
-        if (x > 0 && mask[p - 1] && !seen[p - 1] && labels[p - 1] === lab) { seen[p - 1] = 1; q[tail++] = p - 1; }
-        if (x < W - 1 && mask[p + 1] && !seen[p + 1] && labels[p + 1] === lab) { seen[p + 1] = 1; q[tail++] = p + 1; }
-        if (p >= W && mask[p - W] && !seen[p - W] && labels[p - W] === lab) { seen[p - W] = 1; q[tail++] = p - W; }
-        if (p < n - W && mask[p + W] && !seen[p + W] && labels[p + W] === lab) { seen[p + W] = 1; q[tail++] = p + W; }
-      }
-      if (tail >= Math.max(minArea, softArea)) { regions++; continue; }
-      var votes = new Map(), k;
-      for (k = 0; k < tail; k++) {
-        var pp = q[k], xx = pp % W, nbs = [];
-        if (xx > 0) nbs.push(pp - 1); if (xx < W - 1) nbs.push(pp + 1); if (pp >= W) nbs.push(pp - W); if (pp < n - W) nbs.push(pp + W);
-        for (var t = 0; t < nbs.length; t++) {
-          var nl = labels[nbs[t]];
-          if (mask[nbs[t]] && nl !== lab && nl !== NONE) votes.set(nl, (votes.get(nl) || 0) + 1);
-        }
-      }
-      var win = -1, wv = 0;
-      votes.forEach(function (v, l) { if (v > wv) { wv = v; win = l; } });
-      var doMerge = false;
-      if (win >= 0) {
-        if (tail < minArea) doMerge = true;
-        else {
-          var dl = pal.lab[lab * 3] - pal.lab[win * 3], da = pal.lab[lab * 3 + 1] - pal.lab[win * 3 + 1], db = pal.lab[lab * 3 + 2] - pal.lab[win * 3 + 2];
-          doMerge = Math.sqrt(dl * dl + da * da + db * db) < contrastDE;
-        }
-      }
-      if (doMerge) { for (k = 0; k < tail; k++) labels[q[k]] = win; changed++; merged++; } else regions++;
-    }
-    if (!changed) break;
-  }
-  return { regions: regions, merged: merged };
-}
-
-function paint(rgba, labels, mask, pal, n) {
-  for (var i = 0; i < n; i++) {
-    var o = i * 4;
-    if (mask[i] && labels[i] !== NONE) {
-      var l = labels[i] * 3;
-      rgba[o] = pal.rgb[l]; rgba[o + 1] = pal.rgb[l + 1]; rgba[o + 2] = pal.rgb[l + 2]; rgba[o + 3] = 255;
-    } else if (mask[i]) { rgba[o + 3] = 255; }
-    else { rgba[o] = rgba[o + 1] = rgba[o + 2] = rgba[o + 3] = 0; }
-  }
-}
-
-/* ---------- pipeline utama ----------
-   o: {thr, erodePx, speckArea, flat, K, mergeDE, bandPx, passes, minArea}
-   semua satuan sudah dalam piksel pada resolusi gambar ini (skala dihitung di pemanggil) */
-function process(rgba, W, H, o) {
-  var n = W * H, st = {}, t0 = Date.now();
-  var mask = thresholdMask(rgba, n, o.thr);
-  st.opaqueBefore = 0; for (var i = 0; i < n; i++) st.opaqueBefore += mask[i];
-  if (o.erodePx > 0) { var d0 = distToZero(mask, W, H); for (i = 0; i < n; i++) mask[i] = d0[i] > o.erodePx ? 1 : 0; d0 = null; }
-  st.specks = dropSmall(mask, W, H, o.speckArea, 1);
-  st.holes = dropSmall(mask, W, H, o.speckArea, 0);
-  st.opaque = 0; for (i = 0; i < n; i++) st.opaque += mask[i];
-  st.tAlpha = Date.now() - t0;
-
-  if (!o.flat || !st.opaque) {
-    for (i = 0; i < n; i++) { var p4 = i * 4; if (mask[i]) rgba[p4 + 3] = 255; else { rgba[p4] = rgba[p4 + 1] = rgba[p4 + 2] = rgba[p4 + 3] = 0; } }
-    st.palette = null; return st;
-  }
-
-  var t1 = Date.now();
-  var interior = mask;
-  if (o.bandPx > 0) {
-    var d1 = distToZero(mask, W, H); interior = new Uint8Array(n);
-    for (i = 0; i < n; i++) interior[i] = d1[i] > o.bandPx ? 1 : 0;
-    d1 = null;
-  }
-  var minPop = Math.max(12, Math.round(st.opaque * o.minPopFrac));
-  var pal = buildPalette(rgba, interior, n, o.K, o.mergeDE, minPop);
-  st.tPalette = Date.now() - t1; t1 = Date.now();
-  var labels = assignLabels(rgba, interior, n, pal);
-  if (o.bandPx > 0) bleed(labels, mask, W, H);
-  /* piksel mask tanpa label (tidak terjangkau) → label terdekat paling umum */
-  for (i = 0; i < n; i++) if (mask[i] && labels[i] === NONE) labels[i] = 0;
-  if (o.passes > 0) modeFilter(labels, mask, W, H, o.passes, pal.k);
-  var ms = mergeSmall(labels, mask, W, H, o.minArea, o.softArea, o.contrastDE, pal);
-  st.tFlat = Date.now() - t1;
-  paint(rgba, labels, mask, pal, n);
-
-  var cov = new Float64Array(pal.k);
-  for (i = 0; i < n; i++) if (mask[i]) cov[labels[i]]++;
-  st.palette = [];
-  for (var j = 0; j < pal.k; j++) st.palette.push({ rgb: [pal.rgb[j * 3], pal.rgb[j * 3 + 1], pal.rgb[j * 3 + 2]], frac: cov[j] / st.opaque });
-  st.palette = st.palette.filter(function (e) { return e.frac > 0; }).sort(function (a, b) { return b.frac - a.frac; });
-  st.regions = ms.regions; st.merged = ms.merged; st.minPop = minPop;
-  return st;
-}
-
-var API = { process: process, rgb2lab: rgb2lab };
-if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.AlphaCore = API;
-})(typeof self !== 'undefined' ? self : this);
-
-</script>
-<script>
 (function () {
-  var $ = function (id) { return document.getElementById(id); };
-  var drop = $('drop'), fileIn = $('file');
-  var viewA = $('viewA'), viewB = $('viewB');
-  var DEF = { thr: 128, erode: 1, speck: 20, upscale: '2000', kcol: 24, mde: 8, band: 2, pass: 2, minarea: 20, soft: 10 };
-  var RANGES = ['thr', 'erode', 'speck', 'kcol', 'mde', 'band', 'pass', 'minarea', 'soft'];
-  var el = {}; RANGES.forEach(function (k) { el[k] = $(k); });
-  var upscale = $('upscale'), flatOn = $('flatOn'), autoScale = $('autoScale'), fogHi = $('fogHi');
+  const $ = (id) => document.getElementById(id);
+  const drop = $('drop'), fileIn = $('file');
+  const thr = $('thr'), erode = $('erode'), speck = $('speck'), upscale = $('upscale');
+  const fogHi = $('fogHi'), flatCb = $('flat');
+  const viewA = $('viewA'), viewB = $('viewB');
+  const DEFAULTS = { thr: 128, erode: 1, speck: 20, upscale: '0', flat: true };
 
-  var srcImg = null, srcName = 'gambar';
-  var canvasA = document.createElement('canvas'), canvasB = document.createElement('canvas');
-  var fogStats = null, running = false, again = false;
+  // Batas total piksel kerja. Tracer memperkecil ke sekitar 2700 px lebar (~4 juta piksel),
+  // dan batas ini menjaga memori iPad Safari serta batas ukuran canvas (~16,7 juta piksel).
+  const MAX_PIX = 4200000;
+
+  let srcImg = null;
+  let srcName = 'gambar';
+  const canvasA = document.createElement('canvas');
+  const canvasB = document.createElement('canvas');
+  let timer = null;
+  let busy = false;
 
   function toast(msg) {
-    var t = $('toast'); t.textContent = msg; t.classList.add('show');
-    clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove('show'); }, 2200);
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3200);
   }
-  function hex(rgb) { return '#' + rgb.map(function (v) { return v.toString(16).padStart(2, '0'); }).join(''); }
-  function fmt(n) { return n.toLocaleString('id-ID'); }
 
   /* ---------- Muat gambar ---------- */
   function loadFile(file) {
     if (!file || !file.type.startsWith('image/')) { toast('File harus berupa gambar'); return; }
     srcName = (file.name || 'gambar').replace(/\.[^.]+$/, '');
     $('fname').textContent = file.name || 'dari clipboard';
-    var url = URL.createObjectURL(file), img = new Image();
-    img.onload = function () {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
       srcImg = img; URL.revokeObjectURL(url);
       $('dl').disabled = false; $('reset').disabled = false;
-      analyzeOriginal(); request();
+      schedule(true);
     };
-    img.onerror = function () { toast('Gagal membaca gambar'); };
+    img.onerror = () => toast('Gagal membaca gambar');
     img.src = url;
   }
-  drop.addEventListener('click', function () { fileIn.click(); });
-  fileIn.addEventListener('change', function (e) { loadFile(e.target.files[0]); });
-  ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
-  ['dragleave', 'drop'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('over'); }); });
-  drop.addEventListener('drop', function (e) { loadFile(e.dataTransfer.files[0]); });
-  window.addEventListener('dragover', function (e) { e.preventDefault(); });
-  window.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
-  window.addEventListener('paste', function (e) {
-    var items = (e.clipboardData && e.clipboardData.items) ? Array.prototype.slice.call(e.clipboardData.items) : [];
-    var it = items.filter(function (i) { return i.type.indexOf('image/') === 0; })[0];
-    if (it) loadFile(it.getAsFile());
+
+  drop.addEventListener('click', () => fileIn.click());
+  fileIn.addEventListener('change', (e) => loadFile(e.target.files[0]));
+  ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
+  window.addEventListener('paste', e => {
+    const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
+    if (item) loadFile(item.getAsFile());
   });
 
-  /* ---------- Panel ORIGINAL + statistik kabut (sekali per gambar) ---------- */
-  function analyzeOriginal() {
-    var w = srcImg.naturalWidth, h = srcImg.naturalHeight;
-    canvasA.width = w; canvasA.height = h;
-    var ctx = canvasA.getContext('2d', { willReadFrequently: true });
-    ctx.clearRect(0, 0, w, h); ctx.drawImage(srcImg, 0, 0);
-    var d = ctx.getImageData(0, 0, w, h).data, fog = 0, solid = 0;
-    for (var i = 3; i < d.length; i += 4) { var a = d[i]; if (a > 8 && a < 248) fog++; if (a >= 8) solid++; }
-    fogStats = { fog: fog, solid: solid, total: w * h };
-    drawOriginal();
-    $('infoA').textContent = w + ' × ' + h + ' px';
-  }
-  function drawOriginal() {
+  /* ---------- Penjadwalan ---------- */
+  function schedule(now) {
+    $('o-thr').textContent = thr.value;
+    $('o-erode').textContent = erode.value + ' px';
+    $('o-speck').textContent = speck.value + ' px';
     if (!srcImg) return;
-    var w = srcImg.naturalWidth, h = srcImg.naturalHeight, ctx = canvasA.getContext('2d', { willReadFrequently: true });
-    ctx.clearRect(0, 0, w, h); ctx.drawImage(srcImg, 0, 0);
-    if (fogHi.checked) {
-      var ia = ctx.getImageData(0, 0, w, h), da = ia.data;
-      for (var i = 0; i < da.length; i += 4) {
-        var a = da[i + 3];
-        if (a > 8 && a < 248) { da[i] = 255; da[i + 1] = 79; da[i + 2] = 216; da[i + 3] = Math.max(a, 170); }
+    clearTimeout(timer);
+    $('stats').innerHTML = 'Memproses…';
+    timer = setTimeout(run, now ? 30 : 300);
+  }
+  [thr, erode, speck, upscale, fogHi, flatCb].forEach(el => {
+    el.addEventListener('input', () => schedule(false));
+    el.addEventListener('change', () => schedule(false));
+  });
+
+  /* ---------- Operasi mask ---------- */
+
+  // Erosi dengan kernel bulat (jari-jari r + 0.5), luar canvas dianggap opak.
+  function erodeDisc(mask, W, H, r) {
+    const n = W * H;
+    const R = r + 0.5;
+    const cache = {};
+    function hErode(h) {
+      if (cache[h]) return cache[h];
+      const out = new Uint8Array(n);
+      const P = new Int32Array(W + 1);
+      for (let y = 0; y < H; y++) {
+        const row = y * W;
+        for (let x = 0; x < W; x++) P[x + 1] = P[x] + mask[row + x];
+        for (let x = 0; x < W; x++) {
+          const x0 = x - h < 0 ? 0 : x - h, x1 = x + h > W - 1 ? W - 1 : x + h;
+          out[row + x] = (P[x1 + 1] - P[x0]) === (x1 - x0 + 1) ? 1 : 0;
+        }
       }
-      ctx.putImageData(ia, 0, 0);
+      cache[h] = out;
+      return out;
     }
-    mount(viewA, canvasA);
+    const res = new Uint8Array(n).fill(1);
+    for (let dy = -r; dy <= r; dy++) {
+      const h = Math.floor(Math.sqrt(R * R - dy * dy));
+      const he = hErode(h);
+      for (let y = 0; y < H; y++) {
+        const yy = y + dy;
+        if (yy < 0 || yy >= H) continue;
+        const ro = y * W, ri = yy * W;
+        for (let x = 0; x < W; x++) if (!he[ri + x]) res[ro + x] = 0;
+      }
+    }
+    return res;
   }
 
-  /* ---------- Pemrosesan ---------- */
-  function labels() {
-    $('o-thr').textContent = el.thr.value;
-    $('o-erode').textContent = el.erode.value + ' px';
-    $('o-speck').textContent = el.speck.value + ' px²';
-    $('o-kcol').textContent = el.kcol.value;
-    $('o-mde').textContent = el.mde.value;
-    $('o-band').textContent = el.band.value + ' px';
-    $('o-pass').textContent = el.pass.value + ' putaran';
-    $('o-minarea').textContent = el.minarea.value + ' px²';
-    $('o-soft').textContent = el.soft.value === '0' ? 'mati' : el.soft.value;
-    Array.prototype.forEach.call(document.querySelectorAll('[data-flat]'), function (c) { c.classList.toggle('off', !flatOn.checked); });
-  }
-  function request() {
-    if (!srcImg) return;
-    if (running) { again = true; return; }
-    running = true; $('busy').classList.add('on');
-    setTimeout(function () {
-      try { run(); } catch (err) { console.error(err); toast('Gagal memproses: ' + err.message); }
-      running = false; $('busy').classList.remove('on');
-      if (again) { again = false; request(); }
-    }, 30);
+  // Buang pulau opak yang lebih kecil dari minArea (komponen terhubung 4-arah).
+  function removeSpecks(mask, W, H, minArea) {
+    const n = W * H;
+    const seen = new Uint8Array(n);
+    const q = new Int32Array(n);
+    let removed = 0;
+    for (let i = 0; i < n; i++) {
+      if (!mask[i] || seen[i]) continue;
+      let head = 0, tail = 0;
+      q[tail++] = i; seen[i] = 1;
+      while (head < tail) {
+        const p = q[head++];
+        const x = p % W;
+        if (x > 0     && mask[p - 1] && !seen[p - 1]) { seen[p - 1] = 1; q[tail++] = p - 1; }
+        if (x < W - 1 && mask[p + 1] && !seen[p + 1]) { seen[p + 1] = 1; q[tail++] = p + 1; }
+        if (p >= W    && mask[p - W] && !seen[p - W]) { seen[p - W] = 1; q[tail++] = p - W; }
+        if (p < n - W && mask[p + W] && !seen[p + W]) { seen[p + W] = 1; q[tail++] = p + W; }
+      }
+      if (tail < minArea) {
+        for (let k = 0; k < tail; k++) mask[q[k]] = 0;
+        removed++;
+      }
+    }
+    return removed;
   }
 
+  // Tambal lubang transparan kecil di dalam objek (tidak menyentuh tepi canvas).
+  // Warna piksel yang ditambal diisi rata-rata warna tetangga opaknya.
+  function fillHoles(mask, d, W, H, minArea) {
+    const n = W * H;
+    const seen = new Uint8Array(n);
+    const q = new Int32Array(n);
+    let filled = 0;
+    for (let i = 0; i < n; i++) {
+      if (mask[i] || seen[i]) continue;
+      let head = 0, tail = 0, border = false;
+      q[tail++] = i; seen[i] = 1;
+      while (head < tail) {
+        const p = q[head++];
+        const x = p % W, y = (p - x) / W;
+        if (x === 0 || y === 0 || x === W - 1 || y === H - 1) border = true;
+        if (x > 0     && !mask[p - 1] && !seen[p - 1]) { seen[p - 1] = 1; q[tail++] = p - 1; }
+        if (x < W - 1 && !mask[p + 1] && !seen[p + 1]) { seen[p + 1] = 1; q[tail++] = p + 1; }
+        if (y > 0     && !mask[p - W] && !seen[p - W]) { seen[p - W] = 1; q[tail++] = p - W; }
+        if (y < H - 1 && !mask[p + W] && !seen[p + W]) { seen[p + W] = 1; q[tail++] = p + W; }
+      }
+      if (border || tail >= minArea) continue;
+      let sr = 0, sg = 0, sb = 0, c = 0;
+      for (let k = 0; k < tail; k++) {
+        const p = q[k], x = p % W;
+        const nbs = [];
+        if (x > 0) nbs.push(p - 1);
+        if (x < W - 1) nbs.push(p + 1);
+        if (p >= W) nbs.push(p - W);
+        if (p < n - W) nbs.push(p + W);
+        for (const m of nbs) if (mask[m]) { sr += d[m * 4]; sg += d[m * 4 + 1]; sb += d[m * 4 + 2]; c++; }
+      }
+      if (!c) continue;
+      const r = Math.round(sr / c), g = Math.round(sg / c), b = Math.round(sb / c);
+      for (let k = 0; k < tail; k++) {
+        const p = q[k];
+        d[p * 4] = r; d[p * 4 + 1] = g; d[p * 4 + 2] = b;
+        mask[p] = 1;
+      }
+      filled++;
+    }
+    return filled;
+  }
+
+  /* ---------- Ruang warna Lab ---------- */
+  const LIN = new Float32Array(256);
+  for (let i = 0; i < 256; i++) {
+    const c = i / 255;
+    LIN[i] = c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  }
+  const XN = 0.95047, YN = 1.0, ZN = 1.08883;
+  function labF(t) { return t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116; }
+  function labFinv(t) { const t3 = t * t * t; return t3 > 0.008856 ? t3 : (t - 16 / 116) / 7.787; }
+  function gam(c) {
+    c = c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+    return c < 0 ? 0 : c > 1 ? 255 : Math.round(c * 255);
+  }
+  function lab2rgb(L, a, b, out, o) {
+    const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - b / 200;
+    const X = labFinv(fx) * XN, Y = labFinv(fy) * YN, Z = labFinv(fz) * ZN;
+    out[o]     = gam( 3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z);
+    out[o + 1] = gam(-0.9692660 * X + 1.8760108 * Y + 0.0415560 * Z);
+    out[o + 2] = gam( 0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z);
+  }
+
+  /* ---------- Blur Gauss berbobot mask ---------- */
+  function gaussKernel(sigma) {
+    const r = Math.max(1, Math.ceil(sigma * 3));
+    const k = new Float32Array(r + 1);
+    let s = 0;
+    for (let i = 0; i <= r; i++) { k[i] = Math.exp(-i * i / (2 * sigma * sigma)); s += i === 0 ? k[i] : 2 * k[i]; }
+    for (let i = 0; i <= r; i++) k[i] /= s;
+    return { k, r };
+  }
+  function blur1(src, W, H, ker, tmp, dst) {
+    const k = ker.k, r = ker.r;
+    for (let y = 0; y < H; y++) {
+      const row = y * W;
+      for (let x = 0; x < W; x++) {
+        let acc = src[row + x] * k[0];
+        for (let i = 1; i <= r; i++) {
+          const xl = x - i < 0 ? 0 : x - i, xr = x + i > W - 1 ? W - 1 : x + i;
+          acc += k[i] * (src[row + xl] + src[row + xr]);
+        }
+        tmp[row + x] = acc;
+      }
+    }
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        let acc = tmp[y * W + x] * k[0];
+        for (let i = 1; i <= r; i++) {
+          const yu = y - i < 0 ? 0 : y - i, yd = y + i > H - 1 ? H - 1 : y + i;
+          acc += k[i] * (tmp[yu * W + x] + tmp[yd * W + x]);
+        }
+        dst[y * W + x] = acc;
+      }
+    }
+  }
+
+  // Besar perubahan warna per piksel (dE per px) dari Lab yang sudah di-blur.
+  function gradientOfBlurred(L, A, B, mask, W, H, sigma) {
+    const n = W * H;
+    const ker = gaussKernel(sigma);
+    const w = new Float32Array(n);
+    for (let i = 0; i < n; i++) w[i] = mask[i] ? 1 : 0;
+    const tmp = new Float32Array(n), sig = new Float32Array(n);
+    const den = new Float32Array(n);
+    blur1(w, W, H, ker, tmp, den);
+    const out = [new Float32Array(n), new Float32Array(n), new Float32Array(n)];
+    [L, A, B].forEach((ch, c) => {
+      for (let i = 0; i < n; i++) sig[i] = ch[i] * w[i];
+      blur1(sig, W, H, ker, tmp, out[c]);
+      for (let i = 0; i < n; i++) out[c][i] = out[c][i] / (den[i] > 1e-4 ? den[i] : 1e-4);
+    });
+    const G = new Float32Array(n);
+    for (let y = 0; y < H; y++) {
+      const yu = y > 0 ? y - 1 : y, yd = y < H - 1 ? y + 1 : y;
+      const dyv = yd - yu;
+      for (let x = 0; x < W; x++) {
+        const xl = x > 0 ? x - 1 : x, xr = x < W - 1 ? x + 1 : x;
+        const dxv = xr - xl;
+        let s = 0;
+        for (let c = 0; c < 3; c++) {
+          const f = out[c];
+          const gx = (f[y * W + xr] - f[y * W + xl]) / dxv;
+          const gy = (f[yd * W + x] - f[yu * W + x]) / dyv;
+          s += gx * gx + gy * gy;
+        }
+        G[y * W + x] = Math.sqrt(s);
+      }
+    }
+    return G;
+  }
+
+  /* ---------- Heap kecil untuk penggabungan wilayah ---------- */
+  function Heap() { this.a = []; }
+  Heap.prototype.push = function (it) {
+    const a = this.a; a.push(it);
+    let i = a.length - 1;
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (a[p][0] <= a[i][0]) break;
+      const t = a[p]; a[p] = a[i]; a[i] = t; i = p;
+    }
+  };
+  Heap.prototype.pop = function () {
+    const a = this.a, top = a[0], last = a.pop();
+    if (a.length) {
+      a[0] = last;
+      let i = 0;
+      for (;;) {
+        const l = 2 * i + 1, r = l + 1;
+        let m = i;
+        if (l < a.length && a[l][0] < a[m][0]) m = l;
+        if (r < a.length && a[r][0] < a[m][0]) m = r;
+        if (m === i) break;
+        const t = a[m]; a[m] = a[i]; a[i] = t; i = m;
+      }
+    }
+    return top;
+  };
+
+  /* ---------- Ratakan warna ----------
+     1) Cari inti datar: piksel dengan perubahan warna sangat kecil (bukan tepi).
+     2) Tiap piksel tepi/bercak ikut inti terdekat.
+     3) Gabungkan wilayah bersebelahan yang warnanya hampir sama (kabut), wilayah kecil lebih longgar.
+     4) Isi tiap wilayah dengan satu warna rata. */
+  function flattenColors(d, mask, W, H) {
+    const n = W * H;
+    const sc = Math.min(4, Math.max(0.4, W / 1672));
+    const sigma = 0.8 * sc, G1 = 1.0 / sc;
+    const minCore = Math.max(3, Math.round(4 * sc * sc));
+    const aSmall = 12 * sc * sc;
+    const T_MERGE = 4.0, T_SMALL = 6.0;
+
+    const L = new Float32Array(n), A = new Float32Array(n), B = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      if (!mask[i]) continue;
+      const o = i * 4;
+      const r = LIN[d[o]], g = LIN[d[o + 1]], b = LIN[d[o + 2]];
+      const X = (0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / XN;
+      const Y = (0.2126729 * r + 0.7151522 * g + 0.0721750 * b) / YN;
+      const Z = (0.0193339 * r + 0.1191920 * g + 0.9503041 * b) / ZN;
+      const fx = labF(X), fy = labF(Y), fz = labF(Z);
+      L[i] = 116 * fy - 16; A[i] = 500 * (fx - fy); B[i] = 200 * (fy - fz);
+    }
+
+    let G = gradientOfBlurred(L, A, B, mask, W, H, sigma);
+
+    // inti datar (komponen terhubung dari piksel bergradien kecil)
+    const seen = new Uint8Array(n);
+    const reg = new Int32Array(n);
+    const isCore = new Uint8Array(n);
+    const q = new Int32Array(n);
+    const sumL = [0], sumA = [0], sumB = [0], cnt = [0];
+    let nreg = 0;
+    for (let i = 0; i < n; i++) {
+      if (!mask[i] || seen[i] || G[i] >= G1) continue;
+      let head = 0, tail = 0;
+      q[tail++] = i; seen[i] = 1;
+      while (head < tail) {
+        const p = q[head++];
+        const x = p % W;
+        let m;
+        if (x > 0     && !seen[m = p - 1] && mask[m] && G[m] < G1) { seen[m] = 1; q[tail++] = m; }
+        if (x < W - 1 && !seen[m = p + 1] && mask[m] && G[m] < G1) { seen[m] = 1; q[tail++] = m; }
+        if (p >= W    && !seen[m = p - W] && mask[m] && G[m] < G1) { seen[m] = 1; q[tail++] = m; }
+        if (p < n - W && !seen[m = p + W] && mask[m] && G[m] < G1) { seen[m] = 1; q[tail++] = m; }
+      }
+      if (tail < minCore) continue;
+      nreg++;
+      let sl = 0, sa = 0, sb = 0;
+      for (let k = 0; k < tail; k++) {
+        const p = q[k]; reg[p] = nreg; isCore[p] = 1;
+        sl += L[p]; sa += A[p]; sb += B[p];
+      }
+      sumL.push(sl); sumA.push(sa); sumB.push(sb); cnt.push(tail);
+    }
+    G = null;
+    if (nreg === 0) return { regions: 0, lines: 0 };
+
+    // tetapkan piksel sisanya ke inti terdekat (BFS dari semua inti sekaligus)
+    {
+      let head = 0, tail = 0;
+      for (let i = 0; i < n; i++) if (reg[i] > 0) q[tail++] = i;
+      while (head < tail) {
+        const p = q[head++], r = reg[p], x = p % W;
+        let m;
+        if (x > 0     && reg[m = p - 1] === 0) { reg[m] = r; q[tail++] = m; }
+        if (x < W - 1 && reg[m = p + 1] === 0) { reg[m] = r; q[tail++] = m; }
+        if (p >= W    && reg[m = p - W] === 0) { reg[m] = r; q[tail++] = m; }
+        if (p < n - W && reg[m = p + W] === 0) { reg[m] = r; q[tail++] = m; }
+      }
+    }
+
+    const area = new Float64Array(nreg + 1);
+    for (let i = 0; i < n; i++) if (mask[i]) area[reg[i]]++;
+
+    // wilayah bertetangga
+    const nb = [];
+    for (let r = 0; r <= nreg; r++) nb.push(new Set());
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = y * W + x;
+        if (!mask[i]) continue;
+        const a = reg[i];
+        if (x < W - 1 && mask[i + 1]) { const b = reg[i + 1]; if (a !== b) { nb[a].add(b); nb[b].add(a); } }
+        if (y < H - 1 && mask[i + W]) { const b = reg[i + W]; if (a !== b) { nb[a].add(b); nb[b].add(a); } }
+      }
+    }
+
+    const muL = new Float64Array(nreg + 1), muA = new Float64Array(nreg + 1), muB = new Float64Array(nreg + 1);
+    const w = new Float64Array(nreg + 1);
+    const parent = new Int32Array(nreg + 1);
+    for (let r = 1; r <= nreg; r++) {
+      w[r] = cnt[r]; muL[r] = sumL[r] / cnt[r]; muA[r] = sumA[r] / cnt[r]; muB[r] = sumB[r] / cnt[r];
+      parent[r] = r;
+    }
+    function find(x) {
+      while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; }
+      return x;
+    }
+    function de(a, b) {
+      const dl = muL[a] - muL[b], da = muA[a] - muA[b], db = muB[a] - muB[b];
+      return Math.sqrt(dl * dl + da * da + db * db);
+    }
+    const heap = new Heap();
+    for (let a = 1; a <= nreg; a++) nb[a].forEach(b => { if (a < b) heap.push([de(a, b), a, b]); });
+    while (heap.a.length) {
+      const it = heap.pop();
+      const ra = find(it[1]), rb = find(it[2]);
+      if (ra === rb) continue;
+      const cur = de(ra, rb);
+      if (Math.abs(cur - it[0]) > 1e-6) { heap.push([cur, ra, rb]); continue; }
+      const lim = Math.min(area[ra], area[rb]) < aSmall ? T_SMALL : T_MERGE;
+      if (cur > lim) continue;
+      const tw = w[ra] + w[rb];
+      muL[ra] = (muL[ra] * w[ra] + muL[rb] * w[rb]) / tw;
+      muA[ra] = (muA[ra] * w[ra] + muA[rb] * w[rb]) / tw;
+      muB[ra] = (muB[ra] * w[ra] + muB[rb] * w[rb]) / tw;
+      w[ra] = tw; area[ra] += area[rb];
+      parent[rb] = ra;
+      nb[rb].forEach(x => {
+        const rx = find(x);
+        if (rx === ra || rx === rb) return;
+        nb[ra].add(rx); nb[rx].add(ra);
+        heap.push([de(ra, rx), ra, rx]);
+      });
+    }
+
+    // warna akhir tiap wilayah
+    const rootOf = new Int32Array(nreg + 1);
+    const rgb = new Uint8Array((nreg + 1) * 3);
+    let finalCount = 0;
+    for (let r = 1; r <= nreg; r++) {
+      const rt = find(r); rootOf[r] = rt;
+      if (rt === r) { lab2rgb(muL[r], muA[r], muB[r], rgb, r * 3); finalCount++; }
+    }
+
+    // Pelestarian garis tipis (garis jari, lipatan): piksel non-inti yang warnanya jauh dari wilayahnya
+    // dan dikelilingi (>= 75%) satu wilayah = garis tipis, bukan kabut. Pita tepi di antara dua wilayah
+    // (sekitar 50/50) diabaikan. Piksel garis dibiarkan memakai warna aslinya.
+    const LINE_THR = 10, LINE_SHARE = 0.75;
+    const minLine = Math.max(3, Math.round(4 * sc * sc));
+    const cand = new Uint8Array(n);
+    for (let i = 0; i < n; i++) {
+      if (!mask[i] || isCore[i]) continue;
+      const rt = rootOf[reg[i]];
+      const dl = L[i] - muL[rt], da = A[i] - muA[rt], db = B[i] - muB[rt];
+      if (Math.sqrt(dl * dl + da * da + db * db) > LINE_THR) cand[i] = 1;
+    }
+    const keepPx = new Uint8Array(n);
+    const vis = new Uint8Array(n);
+    const tally = new Int32Array(nreg + 1);
+    const DX = [-1, 0, 1, -1, 1, -1, 0, 1], DY = [-1, -1, -1, 0, 0, 1, 1, 1];
+    let lines = 0;
+    for (let i = 0; i < n; i++) {
+      if (!cand[i] || vis[i]) continue;
+      let head = 0, tail = 0;
+      q[tail++] = i; vis[i] = 1;
+      while (head < tail) {
+        const p = q[head++], x = p % W, y = (p - x) / W;
+        for (let k = 0; k < 8; k++) {
+          const xx = x + DX[k], yy = y + DY[k];
+          if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
+          const m = yy * W + xx;
+          if (cand[m] && !vis[m]) { vis[m] = 1; q[tail++] = m; }
+        }
+      }
+      if (tail < minLine) continue;
+      const touched = [];
+      let total = 0;
+      for (let k = 0; k < tail; k++) {
+        const p = q[k], x = p % W, y = (p - x) / W;
+        for (let j = 0; j < 8; j++) {
+          const xx = x + DX[j], yy = y + DY[j];
+          if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
+          const m = yy * W + xx;
+          if (!mask[m] || cand[m]) continue;
+          const rt = rootOf[reg[m]];
+          if (tally[rt] === 0) touched.push(rt);
+          tally[rt]++; total++;
+        }
+      }
+      let best = 0;
+      for (const rt of touched) { if (tally[rt] > best) best = tally[rt]; tally[rt] = 0; }
+      if (total > 0 && best / total >= LINE_SHARE) {
+        for (let k = 0; k < tail; k++) keepPx[q[k]] = 1;
+        lines++;
+      }
+    }
+
+    for (let i = 0; i < n; i++) {
+      if (!mask[i] || keepPx[i]) continue;
+      const rt = rootOf[reg[i]], o = i * 4;
+      d[o] = rgb[rt * 3]; d[o + 1] = rgb[rt * 3 + 1]; d[o + 2] = rgb[rt * 3 + 2];
+    }
+    return { regions: finalCount, lines: lines };
+  }
+
+  /* ---------- Pipeline utama ---------- */
   function run() {
-    var t0 = performance.now();
-    var w0 = srcImg.naturalWidth, h0 = srcImg.naturalHeight;
-    var target = +upscale.value, longSide = Math.max(w0, h0);
-    var s = (target > 0 && longSide < target) ? target / longSide : 1;
-    var W = Math.round(w0 * s), H = Math.round(h0 * s);
+    if (!srcImg || busy) return;
+    busy = true;
+    try { runInner(); }
+    catch (err) { console.error(err); toast('Gagal memproses: ' + (err && err.message ? err.message : err)); $('stats').textContent = 'Terjadi kesalahan saat memproses.'; }
+    busy = false;
+  }
+
+  function runInner() {
+    const t0 = performance.now();
+
+    // 1) Ukuran kerja (upscale opsional, lalu dibatasi MAX_PIX)
+    const w0 = srcImg.naturalWidth, h0 = srcImg.naturalHeight;
+    const target = +upscale.value;
+    const longSide = Math.max(w0, h0);
+    let s = (target > 0 && longSide < target) ? target / longSide : 1;
+    let capped = false;
+    if (w0 * h0 * s * s > MAX_PIX) { s = Math.sqrt(MAX_PIX / (w0 * h0)); capped = true; }
+    const W = Math.max(1, Math.round(w0 * s)), H = Math.max(1, Math.round(h0 * s));
+    const n = W * H;
 
     canvasB.width = W; canvasB.height = H;
-    var ctx = canvasB.getContext('2d', { willReadFrequently: true });
-    ctx.clearRect(0, 0, W, H);
-    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(srcImg, 0, 0, W, H);
-    var img = ctx.getImageData(0, 0, W, H);
+    const ctxB = canvasB.getContext('2d', { willReadFrequently: true });
+    ctxB.clearRect(0, 0, W, H);
+    ctxB.imageSmoothingEnabled = true;
+    ctxB.imageSmoothingQuality = 'high';
+    ctxB.drawImage(srcImg, 0, 0, W, H);
 
-    /* satuan px dianggap relatif terhadap lebar 2000 px */
-    var S = autoScale.checked ? Math.max(W, H) / 2000 : 1, S2 = S * S;
-    var o = {
-      thr: +el.thr.value,
-      erodePx: Math.round(+el.erode.value * S),
-      speckArea: Math.round(+el.speck.value * S2),
-      flat: flatOn.checked,
-      K: +el.kcol.value, mergeDE: +el.mde.value,
-      bandPx: Math.round(+el.band.value * S),
-      passes: +el.pass.value,
-      minArea: Math.round(+el.minarea.value * S2),
-      softArea: +el.soft.value > 0 ? Math.round(8000 * S2) : 0,
-      contrastDE: +el.soft.value,
-      minPopFrac: 0.00003
-    };
-    var st = AlphaCore.process(img.data, W, H, o);
-    ctx.putImageData(img, 0, 0);
+    const img = ctxB.getImageData(0, 0, W, H);
+    const d = img.data;
+
+    // Statistik kabut alpha (sebelum dibersihkan)
+    let fog = 0, solid = 0;
+    for (let i = 3; i < d.length; i += 4) {
+      const a = d[i];
+      if (a > 8 && a < 248) fog++;
+      if (a >= 8) solid++;
+    }
+
+    // 2) Threshold alpha -> mask biner
+    const T = +thr.value;
+    let mask = new Uint8Array(n);
+    for (let i = 0; i < n; i++) mask[i] = d[i * 4 + 3] >= T ? 1 : 0;
+
+    // 3) Tambal lubang kecil di dalam objek (sebelum erode, supaya erode tidak memperbesar lubang)
+    const minArea = +speck.value;
+    let removedSpecks = 0, filledHoles = 0;
+    if (minArea > 0) filledHoles = fillHoles(mask, d, W, H, minArea);
+
+    // 4) Erode tepi (kernel bulat), lalu hapus bintik kecil di luar objek
+    const r = +erode.value;
+    if (r > 0) mask = erodeDisc(mask, W, H, r);
+    if (minArea > 0) removedSpecks = removeSpecks(mask, W, H, minArea);
+
+    // 5) Ratakan warna (kabut warna)
+    let regions = 0, lines = 0;
+    if (flatCb.checked) { const fr = flattenColors(d, mask, W, H); regions = fr.regions; lines = fr.lines; }
+
+    // 6) Tulis hasil
+    for (let i = 0; i < n; i++) {
+      const o = i * 4;
+      if (mask[i]) { d[o + 3] = 255; }
+      else { d[o] = d[o + 1] = d[o + 2] = 0; d[o + 3] = 0; }
+    }
+    ctxB.putImageData(img, 0, 0);
+
+    // 7) Panel ORIGINAL (ukuran kerja, dengan sorotan kabut alpha bila aktif)
+    const wa = s < 1 ? W : w0, ha = s < 1 ? H : h0;
+    canvasA.width = wa; canvasA.height = ha;
+    const ctxA = canvasA.getContext('2d', { willReadFrequently: true });
+    ctxA.clearRect(0, 0, wa, ha);
+    ctxA.drawImage(srcImg, 0, 0, wa, ha);
+    if (fogHi.checked) {
+      const ia = ctxA.getImageData(0, 0, wa, ha), da = ia.data;
+      for (let i = 0; i < da.length; i += 4) {
+        const a = da[i + 3];
+        if (a > 8 && a < 248) { da[i] = 255; da[i + 1] = 79; da[i + 2] = 216; da[i + 3] = Math.max(a, 170); }
+      }
+      ctxA.putImageData(ia, 0, 0);
+    }
 
     mount(viewA, canvasA); mount(viewB, canvasB);
-    $('infoB').textContent = W + ' × ' + H + ' px' + (s > 1 ? ' (upscale ' + s.toFixed(2) + '×)' : '');
+    $('infoA').textContent = w0 + ' × ' + h0 + ' px';
+    $('infoB').textContent = W + ' × ' + H + ' px' + (s > 1 ? ' (upscale ' + s.toFixed(2) + '×)' : (capped ? ' (diperkecil otomatis)' : ''));
+    if (capped) toast('Gambar besar diperkecil otomatis ke ' + W + ' × ' + H + ' px agar aman di perangkat ini');
 
-    var f = fogStats, pct = f && f.solid ? (f.fog / f.solid * 100) : 0;
-    var html = 'Piksel berkabut (asli): <b class="fog">' + fmt(f.fog) + '</b> (' + pct.toFixed(1) + '%)<br>' +
-      'Efektif di resolusi ini: erode <b>' + o.erodePx + ' px</b>' + (o.flat ? ', tepi <b>' + o.bandPx + ' px</b>' : '') + '<br>' +
-      'Bintik dibuang: <b>' + fmt(st.specks) + '</b>, lubang ditutup: <b>' + fmt(st.holes) + '</b><br>';
-    if (st.palette) {
-      html += 'Warna akhir: <b class="ok">' + st.palette.length + '</b> &middot; Area warna (≈ jumlah path): <b class="ok">' + fmt(st.regions) + '</b><br>';
-    } else if (o.flat) {
-      html += '<span style="color:#ffb454">Tidak ada piksel opak. Cek threshold alpha.</span><br>';
-    } else {
-      html += 'Perataan warna: <b>mati</b><br>';
-    }
-    html += 'Waktu proses: <b>' + Math.round(performance.now() - t0) + ' ms</b>';
-    if (f.solid >= f.total * 0.999) html += '<br><span style="color:#ffb454">Gambar ini tidak punya area transparan. Pakai PNG hasil background removal.</span>';
-    $('stats').innerHTML = html;
-
-    var sw = $('swatches'); sw.innerHTML = '';
-    (st.palette || []).forEach(function (p) {
-      var hx = hex(p.rgb), d = document.createElement('div');
-      d.className = 'sw'; d.title = 'Klik untuk salin ' + hx;
-      d.innerHTML = '<i style="background:' + hx + '"></i><span>' + hx + ' · ' + (p.frac * 100 < 0.1 ? '<0,1' : (p.frac * 100).toFixed(1).replace('.', ',')) + '%</span>';
-      d.addEventListener('click', function () {
-        if (navigator.clipboard) navigator.clipboard.writeText(hx).then(function () { toast('Disalin ' + hx); }, function () {});
-      });
-      sw.appendChild(d);
-    });
+    const pct = solid ? (fog / solid * 100) : 0;
+    const hasAlpha = (fog + solid) > 0 && solid < n;
+    $('stats').innerHTML =
+      'Piksel berkabut (alpha): <b class="fog">' + fog.toLocaleString('id-ID') + '</b> (' + pct.toFixed(1) + '% dari piksel terlihat)<br>' +
+      'Bintik dibuang: <b>' + removedSpecks.toLocaleString('id-ID') + '</b> &middot; Lubang ditambal: <b>' + filledHoles.toLocaleString('id-ID') + '</b><br>' +
+      (flatCb.checked ? 'Wilayah warna rata: <b>' + regions.toLocaleString('id-ID') + '</b> &middot; Garis tipis dijaga: <b>' + lines.toLocaleString('id-ID') + '</b><br>' : 'Ratakan warna: <b>mati</b><br>') +
+      'Waktu proses: <b>' + Math.round(performance.now() - t0) + ' ms</b>' +
+      (hasAlpha ? '' : '<br><span style="color:#ffb454">Gambar ini tampaknya tidak punya area transparan. Pakai PNG hasil background removal.</span>');
   }
 
   function mount(view, canvas) {
     if (canvas.parentNode !== view) { view.innerHTML = ''; view.appendChild(canvas); }
   }
 
-  /* label diperbarui saat digeser; proses jalan saat dilepas */
-  RANGES.forEach(function (k) {
-    el[k].addEventListener('input', labels);
-    el[k].addEventListener('change', request);
-  });
-  [upscale, flatOn, autoScale].forEach(function (e) { e.addEventListener('change', function () { labels(); request(); }); });
-  fogHi.addEventListener('change', drawOriginal);
-
   /* ---------- Latar & zoom ---------- */
-  $('bgSeg').addEventListener('click', function (e) {
-    var b = e.target.closest('button'); if (!b) return;
-    Array.prototype.forEach.call($('bgSeg').children, function (x) { x.classList.toggle('on', x === b); });
-    [viewA, viewB].forEach(function (v) { v.classList.remove('bg-dark', 'bg-white', 'bg-gray'); v.classList.add('bg-' + b.dataset.bg); });
+  $('bgSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    [...$('bgSeg').children].forEach(x => x.classList.toggle('on', x === b));
+    [viewA, viewB].forEach(v => { v.classList.remove('bg-dark', 'bg-white', 'bg-gray'); v.classList.add('bg-' + b.dataset.bg); });
   });
-  $('zoomSeg').addEventListener('click', function (e) {
-    var b = e.target.closest('button'); if (!b) return;
-    Array.prototype.forEach.call($('zoomSeg').children, function (x) { x.classList.toggle('on', x === b); });
-    [viewA, viewB].forEach(function (v) { v.classList.toggle('fit', b.dataset.z === 'fit'); });
+  $('zoomSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    [...$('zoomSeg').children].forEach(x => x.classList.toggle('on', x === b));
+    [viewA, viewB].forEach(v => v.classList.toggle('fit', b.dataset.z === 'fit'));
   });
 
   /* ---------- Download & reset ---------- */
-  $('dl').addEventListener('click', function () {
+  $('dl').addEventListener('click', () => {
     if (!srcImg) return;
-    canvasB.toBlob(function (blob) {
-      var a = document.createElement('a');
+    canvasB.toBlob(blob => {
+      if (!blob) { toast('Gagal membuat file PNG'); return; }
+      const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = srcName + '-bersih.png';
       document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
       toast('PNG bersih diunduh');
     }, 'image/png');
   });
-  $('reset').addEventListener('click', function () {
-    RANGES.forEach(function (k) { el[k].value = DEF[k]; });
-    upscale.value = DEF.upscale; flatOn.checked = true; autoScale.checked = true;
-    labels(); request();
-  });
 
-  labels();
+  $('reset').addEventListener('click', () => {
+    thr.value = DEFAULTS.thr; erode.value = DEFAULTS.erode; speck.value = DEFAULTS.speck;
+    upscale.value = DEFAULTS.upscale; flatCb.checked = DEFAULTS.flat;
+    schedule(false);
+  });
 })();
 </script>
 </body>
